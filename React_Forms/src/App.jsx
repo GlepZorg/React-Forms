@@ -5,11 +5,27 @@ import Authenticate from './components/Authenticate'
 
 function App() {
   const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] =useState("");
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState('');
   const [error, setError] = useState(null);
+  const [token, setToken] = useState(null);
 
   async function handleSubmit(event){
     event.preventDefault();
+
+    if(username.length < 8){
+      setUsernameError("Username must be at least 8 characters long");
+      return;
+    }
+    if(password.length < 8){
+      setPasswordError("Password must be at least 8 characters long");
+      return;
+    }
+
+    setUsernameError("");
+    setPasswordError("");
+
     try{
       const response = await fetch("https://fsa-jwt-practice.herokuapp.com/signup", {
         method: 'POST',
@@ -27,6 +43,7 @@ function App() {
       }
 
       const result = await response.json();
+      setToken(result.token);
       console.log(result);
 
     } catch(e){
@@ -35,17 +52,21 @@ function App() {
   }
   return (
     <>
-      <SignUpForm />
+      <SignUpForm token={token} setToken={setToken}/>
       <form onSubmit={handleSubmit}>
         <label >
-          Username: <input value={username} onChange={(e) => setUsername(e.target.value)}/>
+          Username: 
+          <input value={username} onChange={(e) => setUsername(e.target.value)} type='text'/>
         </label>
+        {usernameError && <p className="error">{usernameError}</p>}
         <label >
-          Password: <input value={username} onChange={(e) => setUsername(e.target.value)}/>
+          Password: 
+          <input type='password' value={password} onChange={(e) => setPassword(e.target.value)}/>
         </label>
+        {passwordError && <p className="error">{passwordError}</p>}
         <button >Submit</button>
       </form>
-      <Authenticate />
+      <Authenticate token = {token} setToken={setToken}/>
 
     </>
   )
